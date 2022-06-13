@@ -64,7 +64,7 @@ ena_table$R2 <- NA
 for (i in 1:nrow(ena_table)) {
   # base
   ena_table$base[i] <-   paste(c(
-    "ftp://ftp.sra.ebi.ac.uk/vol1/fastq/",
+    "ftp.sra.ebi.ac.uk/vol1/fastq/",
     ena_table$p1[i], "/",
     ena_table$p2[i], "/",
     ena_table$acc[i], "/",
