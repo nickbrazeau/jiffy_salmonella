@@ -1,7 +1,7 @@
 #! /bin/bash
 
-ROOT=/proj/ideel/julianog/users/apm/pf3k_v5 # root directory for project (non-scratch)
-WD=$SCRATCH/pf3k_v5 # working directory for alignments (scratch)
+ROOT=//proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/snake_align # root directory for project (non-scratch)
+WD=/pine/scr/n/f/nfb/Projects/jiffy_salmonella/snake_align # working directory for alignments (scratch)
 NODES=1028 # max number of cluster nodes
 WAIT=30 # number of seconds to wait for files to appear, absorbing some file system latency
 
@@ -15,4 +15,4 @@ snakemake \
 	--rerun-incomplete \
 	--keep-going \
 	--latency-wait $WAIT \
-	--dryrun -p 
+	--dryrun -p
