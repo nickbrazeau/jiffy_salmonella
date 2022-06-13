@@ -10,6 +10,6 @@ readbuffer: 1000000
 threads: 6
 memory: 12
 
-runs: salmonella_run_map.tab.txt
+runs: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/snake_align/salmonella_run_map.tab.txt
 aligned: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/snake_align/aln/
 fastq: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/
