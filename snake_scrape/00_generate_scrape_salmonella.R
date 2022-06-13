@@ -88,3 +88,13 @@ ena_table %>%
   dplyr::select(c("acc", "R1", "R2")) %>%
   readr::write_tsv(x = .,
                    "snake_scrape/ENA_master_acc_download_map.tab.txt")
+
+#............................................................
+# run map
+#...........................................................
+out %>%
+  dplyr::select(c("biosample_acc", "Run")) %>%
+  dplyr::mutate(space = ".") %>%
+  magrittr::set_colnames(NA) %>%
+  readr::write_tsv(x = .,
+                   "snake_align/salmonella_run_map.tab.txt")
