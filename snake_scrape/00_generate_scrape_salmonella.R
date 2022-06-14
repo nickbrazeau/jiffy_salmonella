@@ -29,7 +29,8 @@ recent_salm <- pathos %>%
 pb <- pathos %>%
   dplyr::mutate(collection_date = lubridate::ymd(collection_date)) %>%
   dplyr::mutate(isolation_source = tolower(isolation_source))
-pb <- pb[ grepl("peanut", tolower(pb$isolation_source)), ]
+pb <- pb[ grepl("peanut", tolower(pb$isolation_source)) |
+                  grepl("SRR975406", pb$Run), ] # manually add suspected culprit: SRR975406
 pb <- pb %>%
   dplyr::filter(collected_by == "FDA")
 
@@ -92,9 +93,17 @@ ena_table %>%
 #............................................................
 # run map
 #...........................................................
-out %>%
+runmap <- out %>%
   dplyr::select(c("biosample_acc", "Run")) %>%
-  dplyr::mutate(space = ".") %>%
-  magrittr::set_colnames(NA) %>%
+  dplyr::mutate(space = ".")
+
+
+#......................
+# intersect w/ available sequences
+#......................
+runmap <- dplyr::inner_join(runmap, available, by = "Run")
+# out
+runmap %>%
   readr::write_tsv(x = .,
-                   "snake_align/salmonella_run_map.tab.txt")
+                   "snake_align/salmonella_run_map.tab.txt", col_names = F)
+

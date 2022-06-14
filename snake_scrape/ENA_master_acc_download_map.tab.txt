@@ -189,4 +189,5 @@ SRR12678830	ftp.sra.ebi.ac.uk/vol1/fastq/SRR126/030/SRR12678830/SRR12678830_1.fa
 SRR13313246	ftp.sra.ebi.ac.uk/vol1/fastq/SRR133/046/SRR13313246/SRR13313246_1.fastq.gz	ftp.sra.ebi.ac.uk/vol1/fastq/SRR133/046/SRR13313246/SRR13313246_2.fastq.gz
 SRR13321682	ftp.sra.ebi.ac.uk/vol1/fastq/SRR133/082/SRR13321682/SRR13321682_1.fastq.gz	ftp.sra.ebi.ac.uk/vol1/fastq/SRR133/082/SRR13321682/SRR13321682_2.fastq.gz
 SRR14093572	ftp.sra.ebi.ac.uk/vol1/fastq/SRR140/072/SRR14093572/SRR14093572_1.fastq.gz	ftp.sra.ebi.ac.uk/vol1/fastq/SRR140/072/SRR14093572/SRR14093572_2.fastq.gz
+SRR975406	ftp.sra.ebi.ac.uk/vol1/fastq/SRR975/00NA/SRR975406/SRR975406_1.fastq.gz	ftp.sra.ebi.ac.uk/vol1/fastq/SRR975/00NA/SRR975406/SRR975406_2.fastq.gz
 SRR19586216	ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/016/SRR19586216/SRR19586216_1.fastq.gz	ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/016/SRR19586216/SRR19586216_2.fastq.gz
