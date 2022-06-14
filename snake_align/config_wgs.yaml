@@ -1,5 +1,5 @@
 # configuration for alignment pipeline
-reference: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/GCF_000006945.2_ASM694v2_genomic.fna
+reference: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/refgenomes/GCF_000006945.2_ASM694v2_genomic.fna
 
 adapters: /nas02/apps/trimmomatic-0.36/Trimmomatic-0.36/adapters/TruSeq3-PE.fa
 min_trimmed_length: 30
