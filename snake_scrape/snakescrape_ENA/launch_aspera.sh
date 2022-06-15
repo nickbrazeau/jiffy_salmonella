@@ -2,7 +2,7 @@
 
 ROOT=/proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/snake_scrape/snakescrape_ENA # root directory for project (non-scratch)
 WD=/pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/ # working directory for alignments (scratch)
-NODES=128 # don't overwhelm server
+NODES=514 # don't overwhelm server
 WAIT=30 # number of seconds to wait for files to appear, absorbing some file system latency
 
 snakemake \

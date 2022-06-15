@@ -21,7 +21,7 @@ recent_salm <- pathos %>%
   dplyr::mutate(collection_date = lubridate::ymd(collection_date),
                 isolation_source = tolower(isolation_source)) %>%
   dplyr::filter(collection_date >= lubridate::ymd("2022-01-01") &
-                  collection_date < lubridate::ymd("2023-01-01"),
+                  collection_date < lubridate::ymd("2022-05-12"), # date ENA updated to as of 6/14
                 collected_by == "FDA")
 #......................
 # peanut butter samples
