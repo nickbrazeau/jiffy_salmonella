@@ -99,11 +99,11 @@ rule trim_and_align:
 	input:
 		ref = REF,
 		adapters = ADAPTERS,
-		read1 = os.path.join(SEQROOT, "{rg}_1.fastq.gz"),
-		read2 = os.path.join(SEQROOT, "{rg}_2.fastq.gz")
+		read1 = os.path.join(SEQROOT, "{sample}/{rg}_1.fastq.gz"),
+		read2 = os.path.join(SEQROOT, "{sample}/{rg}_2.fastq.gz")
 	output:
-		aligned = temp( os.path.join(ALNROOT, "lanes_raw/{rg}.aligned.bam") ),
-		trimlog = os.path.join(SEQROOT, "{rg}_trimming.log")
+		aligned = temp( os.path.join(ALNROOT, "lanes_raw/{sample}/{rg}.aligned.bam") ),
+		trimlog = os.path.join(SEQROOT, "{sample}/{rg}_trimming.log")
 		# split = "{alnroot}/lanes_raw/{sample}_{barcode}_{lane}.split.bam",
 		# discordant = "{alnroot}/lanes_raw/{sample}_{barcode}_{lane}.discordant.bam",
 		# unmapped = "{alnroot}/lanes_raw/{sample}_{barcode}_{lane}.unmapped.fastq"

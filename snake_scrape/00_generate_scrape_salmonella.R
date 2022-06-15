@@ -101,9 +101,27 @@ runmap <- out %>%
 #......................
 # intersect w/ available sequences
 #......................
+available <- readr::read_tsv("mtdt/ena_available.tab.txt", col_names = F)
+colnames(available) <- "Run"
 runmap <- dplyr::inner_join(runmap, available, by = "Run")
 # out
 runmap %>%
   readr::write_tsv(x = .,
                    "snake_align/salmonella_run_map.tab.txt", col_names = F)
+
+# symlink architecture
+runmap %>%
+  dplyr::mutate(r1 = paste0("/pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/raw", "/",
+                           Run, "_1.fastq.gz"),
+                r2 = paste0("/pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/raw", "/",
+                            Run, "_2.fastq.gz")) %>%
+  dplyr::select(c("biosample_acc", "r1", "r2")) %>%
+  tidyr::pivot_longer(cols = c("r1","r2"), values_to = "reads") %>%
+  dplyr::mutate(
+    end = stringr::str_split_fixed(reads, "/", n =11)[,11],
+    end = paste0(biosample_acc, "/", end)
+  ) %>%
+  dplyr::select(-c("name")) %>%
+  readr::write_tsv(., "snake_align/symlink_architecture.tab.txt")
+
 
