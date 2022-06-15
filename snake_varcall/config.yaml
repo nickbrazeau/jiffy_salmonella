@@ -1,0 +1,9 @@
+## basic config options
+ref: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/refgenomes/GCF_000006945.2_ASM694v2_genomic.fna
+regions: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/regions/salmonella_proper.bed
+samples: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/lists/all_bams.list
+max_alleles: 3
+outdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/vcfs_gatk_joint_raw
+tmpdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/tmp
+mem: 24
+mode: novel

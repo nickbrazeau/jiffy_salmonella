@@ -30,7 +30,7 @@ pb <- pathos %>%
   dplyr::mutate(collection_date = lubridate::ymd(collection_date)) %>%
   dplyr::mutate(isolation_source = tolower(isolation_source))
 pb <- pb[ grepl("peanut", tolower(pb$isolation_source)) |
-                  grepl("SRR975406", pb$Run), ] # manually add suspected culprit: SRR975406
+            grepl("SRR975406", pb$Run), ] # manually add suspected culprit: SRR975406
 pb <- pb %>%
   dplyr::filter(collected_by == "FDA")
 
@@ -39,7 +39,6 @@ pb <- pb %>%
 #......................
 out <- dplyr::bind_rows(recent_salm, pb) %>%
   dplyr::filter(Run != "NULL")
-readr::write_tsv(out, "mtdt/mtdt_salm_download.tsv")
 
 #............................................................
 # edit accessions for SRA
@@ -109,10 +108,17 @@ runmap %>%
   readr::write_tsv(x = .,
                    "snake_align/salmonella_run_map.tab.txt", col_names = F)
 
+# mtdt
+mtdt <- dplyr::left_join(runmap, out, by = c("Run", "biosample_acc"))
+mtdt %>%
+  readr::write_tsv(., "mtdt/mtdt_salm_download.tsv")
+
+
+
 # symlink architecture
 runmap %>%
   dplyr::mutate(r1 = paste0("/pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/raw", "/",
-                           Run, "_1.fastq.gz"),
+                            Run, "_1.fastq.gz"),
                 r2 = paste0("/pine/scr/n/f/nfb/Projects/jiffy_salmonella/public_seqs/raw", "/",
                             Run, "_2.fastq.gz")) %>%
   dplyr::select(c("biosample_acc", "r1", "r2")) %>%

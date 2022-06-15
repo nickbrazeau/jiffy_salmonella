@@ -17,10 +17,11 @@ library(vcfRmanip)
 gff <- vcfRmanip::GFF2VariantAnnotation_Short("refgenomes/salmonella_proper.gff")
 gff_cg <- gff %>%
   dplyr::filter(grepl("STM", GeneID))
-
+# create
+dir.create("regions")
 gff_cg %>%
   dplyr::select(c("seqname", "start", "end")) %>%
   dplyr::mutate(start = start - 1,
                 end = end - 1) %>%
-  readr::write_tsv(., file = "refgenomes/salmonella_proper.bed", col_names = F)
+  readr::write_tsv(., file = "regions/salmonella_proper.bed", col_names = F)
 
