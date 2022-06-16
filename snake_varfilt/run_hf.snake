@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 """
-Purpose of this script is to hard filter 
+Purpose of this script is to hard filter
 for analysis
 """
 
@@ -51,7 +51,7 @@ rule tidy_up:
 # see https://informatics.fas.harvard.edu/whole-genome-resquencing-for-population-genomics-fastq-to-vcf.html#variantcalling
 rule filter_vars:
 	input:
-		vcf = os.path.join(OUTDIR, "combined.joint.vcf.gz"),
+		vcf = os.path.join(OUTDIR, "firstpass.vcf.gz"),
 		target = os.path.expandvars(config["target"]),
 	output:
 		os.path.join(OUTDIR, "filtered.joint.vcf.gz")

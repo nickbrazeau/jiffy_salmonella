@@ -2,7 +2,7 @@
 gvcflist: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/lists/passed_smpls.gvcfs.list
 reference: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/refgenomes/GCF_000006945.2_ASM694v2_genomic.fna
 target: /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/regions/salmonella_proper.bed
-outdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/vcfs_hardfilt_variants/
+outdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/vcfs_gatk_joint_raw/chunks/all/
 tmpdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/tmpdir/
 # combine vcf inputs
 max_alleles: 3
