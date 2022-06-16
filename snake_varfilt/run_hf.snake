@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 """
-Purpose of this script is to hard filter our mtdna
+Purpose of this script is to hard filter 
 for analysis
 """
 
@@ -85,40 +85,4 @@ rule filter_vars:
 			--filter-expression "vc.isSNP() && ((vc.hasAttribute('MQ') && MQ < {params.min_MQ}) || (vc.hasAttribute('MQRankSum') && MQRankSum < {params.min_MQRS}))" \
 			--filter-name "LowMQ" \
 			-O {output}
-		"""
-
-## DISCOVERY MODE: perform joint calling
-rule joint_genotype:
-	input:
-		combined_gvcf = os.path.join(OUTDIR, "combined.g.vcf.gz")
-	output:
-		joint_vcf = os.path.join(OUTDIR, "combined.joint.vcf.gz")
-	params:
-		maxalleles = config["max_alleles"],
-		ref = REF,
-		memory = str(int(config["recal_memory"]))
-	shell:
-		r"""
-		gatk --java-options "-Xmx{params.memory}g" GenotypeGVCFs \
-			-R {params.ref} \
-			-V {input.combined_gvcf} \
-			-O {output.joint_vcf} \
-			--max-alternate-alleles {params.maxalleles}
-		"""
-
-## DISCOVERY MODE: join GVCFs in prep for joint calling
-rule combine_gvcfs:
-	input:
-		gvcf_list = os.path.join(GVCFlist)
-	output:
-		combined_gvcf = os.path.join(OUTDIR, "combined.g.vcf.gz")
-	params:
-		ref = REF,
-		memory = str(int(config["recal_memory"]))
-	shell:
-		r"""
-		gatk --java-options "-Xmx{params.memory}g" CombineGVCFs \
-			-R {params.ref} \
-			--variant {input.gvcf_list} \
-			-O {output.combined_gvcf}
 		"""
