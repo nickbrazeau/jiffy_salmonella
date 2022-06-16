@@ -12,4 +12,5 @@ snakemake \
 	--rerun-incomplete \
 	--keep-going \
 	--latency-wait $WAIT \
+	--cores 1 \
 	--dryrun -p
