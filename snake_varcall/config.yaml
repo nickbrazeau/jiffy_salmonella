@@ -6,4 +6,3 @@ max_alleles: 3
 outdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/vcfs_gatk_joint_raw
 tmpdir: /pine/scr/n/f/nfb/Projects/jiffy_salmonella/tmp
 mem: 24
-mode: novel

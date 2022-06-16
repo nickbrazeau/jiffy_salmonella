@@ -200,8 +200,6 @@ rule call_variants:
 			-I {input.bam} \
 			-O {output} \
 			-L /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/regions/salmonella_proper.bed \
-			--genotyping-mode {params.mode} \
-			--alleles {params.known} \
 			-ERC {params.ref_conf}
 		"""
 
