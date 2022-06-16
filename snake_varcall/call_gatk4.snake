@@ -199,20 +199,10 @@ rule call_variants:
 			-R {input.ref} \
 			-I {input.bam} \
 			-O {output} \
-			-L {params.interval_file} \
+			-L /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/regions/salmonella_proper.bed \
 			--genotyping-mode {params.mode} \
 			--alleles {params.known} \
 			-ERC {params.ref_conf}
 		"""
 
-## split master target list into one file of intervals per chunk
-rule make_interval_files:
-	input:
-		REGIONS
-	output:
-		interval_files.values()
-	run:
-		for rname, ivls in regions.items():
-			with open(os.path.join(IVLDIR, rname + ".bed"), "w") as rfile:
-				for ivl in ivls:
-					rfile.write(str(ivl))
+#
