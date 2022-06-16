@@ -1,7 +1,7 @@
 #! /bin/bash
 
-ROOT=/proj/ideel/meshnick/users/NickB/Projects/VivID_Seq/hardfilters_variants
-WD=/pine/scr/n/f/nfb/Projects/VivID_Seq/vcfs_hardfilt_variants/
+ROOT=/proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/snake_varfilt
+WD=/pine/scr/n/f/nfb/Projects/jiffy_salmonella/snake_varfilt
 WAIT=30 # number of seconds to wait for files to appear, absorbing some file system latency
 
 snakemake \
