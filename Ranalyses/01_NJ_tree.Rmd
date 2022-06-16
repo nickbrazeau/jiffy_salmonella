@@ -1,0 +1,129 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# NJ/Phylo Analyses
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, eval = T, results = 'hide',
+                      fig.align = 'center', fig.width = 8, fig.height = 8)
+knitr::opts_knit$set(root.dir = here::here())
+```
+
+
+```{r}
+library(tidyverse)
+library(Biostrings)
+library(ape)
+library(ggtree)
+set.seed(48)
+```
+
+```{r}
+#---------------------------------------------------- 
+# Read In
+#---------------------------------------------------- 
+mtdna <- Biostrings::readDNAStringSet(filepath = "data/fasta/mtdna_anc.fa")
+
+
+# mtdt and define countries
+mtdt <- readRDS("data/derived_data/mtdt.RDS") %>% 
+  dplyr::filter(passed == "Y") %>%
+  dplyr::mutate(effcountry = ifelse(vividregion == "Lab", "Lab",
+                                    ifelse(vividregion == "NHA", "NHA",
+                                           country)))
+
+
+
+```
+
+
+
+### Distance Metrics
+```{r}
+mtdna.unique.ape <- ape::as.DNAbin(mtdna)
+
+mtdna.dist.JC <- ape::dist.dna(mtdna.unique.ape, model="JC69")
+mtdna.dist.n <- ape::dist.dna(mtdna.unique.ape, model="N")
+```
+
+
+## Pretty Tree
+```{r}
+#......................
+# make prettty tree
+#......................
+prettdir <- readxl::read_excel("aesthetics/tree_color_decode.xlsx")
+tree <- fitGTR$tree
+tree <- ape::root(tree, "ERS001838")
+tidytree <-  treeio::as.treedata(tree)
+
+# tidy and make tree
+treemtdt <- mtdt %>%
+  dplyr::mutate(effcountry = ifelse(smpls == "ERS001838", "pcynomolgi", effcountry)) %>%
+  dplyr::rename(label = smpls) %>%
+  dplyr::select(c("label", "effcountry")) %>%
+  dplyr::mutate(treegroup = ifelse(label == "Ebro1944", "Ebro1944",
+                                   ifelse(label == "ERS001838", "Pcynomolgi",
+                                          ifelse(effcountry == "CD", "DRC", effcountry))))
+
+tidytree <- full_join(tidytree, treemtdt, by = 'label')
+tidytree@extraInfo$treegroup[is.na(tidytree@extraInfo$treegroup)] <- "zinternal"
+tidytree@extraInfo$treegroup[is.na(tidytree@extraInfo$treegroup)] <- "zinternal"
+
+# make plot
+bstree_plotObj <- ggtree(tidytree,
+                         branch.length="none",
+                         layout="circular",
+                         aes(color = treegroup)) +
+  geom_tippoint(aes(color =  treegroup, shape = treegroup),
+                show.legend = F,
+                size = 0.8) +
+  scale_color_manual(name = "Country",
+                     labels =c("Brazil","China","Colombia","DRC","Ebro1944","Ethiopia","Indonesia" ,"India","Cambodia","Laos","Lab","Sri Lanka",
+                               "Madagascar","Myanmar","Mexico","Malaysia","NHA","Pcynomolgi","Peru","Papua New Guinea","Thailand","Vietnam", "zinternal"),
+                     values = c(prettdir$hexcolor, "#000000")) +
+  scale_shape_manual(name = "Country",
+                     labels = c("Brazil","China","Colombia","DRC","Ebro1944","Ethiopia","Indonesia" ,"India","Cambodia","Laos","Lab ","Sri Lanka",
+                                "Madagascar","Myanmar","Mexico","Malaysia","NHA","Pcynomolgi","Peru","Papua New Guinea","Thailand","Vietnam", "zinternal"),
+                     values =  c(prettdir$shape, 0)) +
+  theme_tree() +
+  theme(legend.title = element_text(hjust = 0.5, vjust = 0.5, face = "bold"))
+
+
+
+
+```
+
+```{r, results='asis', fig.width=11, fig.height=8, fig.align='center'}
+plot(bstree_plotObj)
+```
+
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
