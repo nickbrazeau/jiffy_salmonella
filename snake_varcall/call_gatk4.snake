@@ -129,7 +129,7 @@ rule joint_genotype:
 			-R {params.ref} \
 			-V {input.combined_gvcf} \
 			-O {output} \
-			-L {params.interval_file} \
+			-L /proj/ideel/meshnick/users/NickB/Projects/jiffy_salmonella/regions/salmonella_proper.bed \
 			--max-alternate-alleles {params.maxalleles}
 		"""
 
