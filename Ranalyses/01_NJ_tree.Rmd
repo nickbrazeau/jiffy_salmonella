@@ -14,39 +14,33 @@ knitr::opts_knit$set(root.dir = here::here())
 
 ```{r}
 library(tidyverse)
-library(Biostrings)
+library(vcfR)
+library(vcfRmanip)
 library(ape)
+library(adegenet)
+library(poppr)
 library(ggtree)
-set.seed(48)
 ```
 
 ```{r}
 #---------------------------------------------------- 
 # Read In
 #---------------------------------------------------- 
-mtdna <- Biostrings::readDNAStringSet(filepath = "data/fasta/mtdna_anc.fa")
+mtdt <- read_tsv("mtdt/mtdt_clean_sm.tab.txt")
+vcfbinomiss <- readRDS("data/salmonellavcf/consensus_thinned_passed.joint.vcf.gz")
 
 
-# mtdt and define countries
-mtdt <- readRDS("data/derived_data/mtdt.RDS") %>% 
-  dplyr::filter(passed == "Y") %>%
-  dplyr::mutate(effcountry = ifelse(vividregion == "Lab", "Lab",
-                                    ifelse(vividregion == "NHA", "NHA",
-                                           country)))
 
-
+#............................................................
+# distance matrix large
+#...........................................................
+geneDist <- poppr::nei.dist( vcfR::vcfR2genind(vcfbinomiss))
+saveRDS(geneDist, "data/salmonellavcf/geneDist.RDS")
+myTree <- nj(as.matrix(geneDist))
 
 ```
 
 
-
-### Distance Metrics
-```{r}
-mtdna.unique.ape <- ape::as.DNAbin(mtdna)
-
-mtdna.dist.JC <- ape::dist.dna(mtdna.unique.ape, model="JC69")
-mtdna.dist.n <- ape::dist.dna(mtdna.unique.ape, model="N")
-```
 
 
 ## Pretty Tree
@@ -54,76 +48,98 @@ mtdna.dist.n <- ape::dist.dna(mtdna.unique.ape, model="N")
 #......................
 # make prettty tree
 #......................
-prettdir <- readxl::read_excel("aesthetics/tree_color_decode.xlsx")
-tree <- fitGTR$tree
-tree <- ape::root(tree, "ERS001838")
-tidytree <-  treeio::as.treedata(tree)
+tidytree <-  treeio::as.treedata(myTree)
 
 # tidy and make tree
 treemtdt <- mtdt %>%
-  dplyr::mutate(effcountry = ifelse(smpls == "ERS001838", "pcynomolgi", effcountry)) %>%
-  dplyr::rename(label = smpls) %>%
-  dplyr::select(c("label", "effcountry")) %>%
-  dplyr::mutate(treegroup = ifelse(label == "Ebro1944", "Ebro1944",
-                                   ifelse(label == "ERS001838", "Pcynomolgi",
-                                          ifelse(effcountry == "CD", "DRC", effcountry))))
+  dplyr::mutate(label = biosample_acc,
+                PeanutButter = pb,
+                color = dplyr::case_when(
+                  culprit == "y" ~ "Culprit",
+                  pb == "y" ~ "Peanuts",
+                  pb == "n" & culprit == "n" & biosample_acc != "parr" ~ "Seq2022",
+                  biosample_acc == "parr" ~ "Parr!"
+                ))
 
-tidytree <- full_join(tidytree, treemtdt, by = 'label')
-tidytree@extraInfo$treegroup[is.na(tidytree@extraInfo$treegroup)] <- "zinternal"
-tidytree@extraInfo$treegroup[is.na(tidytree@extraInfo$treegroup)] <- "zinternal"
+tidytree <- left_join(tidytree, treemtdt, by = 'label')
 
 # make plot
-bstree_plotObj <- ggtree(tidytree,
-                         branch.length="none",
-                         layout="circular",
-                         aes(color = treegroup)) +
-  geom_tippoint(aes(color =  treegroup, shape = treegroup),
+treeplot_large <- tidytree %>% 
+  ggtree(.,
+         #layout="fan",
+         aes(color = color)) +
+  geom_tippoint(aes(color =  color, shape = color),
                 show.legend = F,
-                size = 0.8) +
-  scale_color_manual(name = "Country",
-                     labels =c("Brazil","China","Colombia","DRC","Ebro1944","Ethiopia","Indonesia" ,"India","Cambodia","Laos","Lab","Sri Lanka",
-                               "Madagascar","Myanmar","Mexico","Malaysia","NHA","Pcynomolgi","Peru","Papua New Guinea","Thailand","Vietnam", "zinternal"),
-                     values = c(prettdir$hexcolor, "#000000")) +
-  scale_shape_manual(name = "Country",
-                     labels = c("Brazil","China","Colombia","DRC","Ebro1944","Ethiopia","Indonesia" ,"India","Cambodia","Laos","Lab ","Sri Lanka",
-                                "Madagascar","Myanmar","Mexico","Malaysia","NHA","Pcynomolgi","Peru","Papua New Guinea","Thailand","Vietnam", "zinternal"),
-                     values =  c(prettdir$shape, 0)) +
+                size = 1) +
+  geom_text(aes(label = cntnm), size = 6, fontface = "bold", hjust = -0.15) +
   theme_tree() +
-  theme(legend.title = element_text(hjust = 0.5, vjust = 0.5, face = "bold"))
+  scale_color_manual(name = "Source",
+                     values = c("#FF0018", "#B22234", "#008018", "#0000F9", "#86007D")) +
+  theme(legend.position = "none") +
+  xlim(0, 0.15)
 
+```
 
+```{r}
+#............................................................
+# distance matrix small
+#...........................................................
+smsmpls <- mtdt %>% 
+  dplyr::filter(cntnm %in% c("Canada_2022.4",
+                             "USA:GA_2020.1",
+                             "Syria_2022.6",
+                             "USA:AR_2012.1",
+                             "USA:NM_2011.2",
+                              "USA:NM_2011.1",
+                               "USA:NM_2011.11",
+                              "Egypt_2022.2",
+                              "Egypt_2022.1",
+                              "India_2022.4",
+                              "Parr!",
+                              "USA: KY_2010.1",
+                              "Bangladesh_2022.1",
+                              "Ghana_2022.1",
+                              "Mexico_2022.1"
+                             )) %>% 
+  dplyr::select(biosample_acc) %>% 
+  dplyr::pull()
+
+vcfsm <- vcfRmanip::select_samples(vcfbinomiss, smplvctr = smsmpls)
+geneDist <- poppr::nei.dist( vcfR::vcfR2genind(vcfsm))
+myTree <- nj(as.matrix(geneDist))
+tidytree <-  treeio::as.treedata(myTree)
+#............................................................
+# small tree
+#...........................................................
+tidytree <- left_join(tidytree, treemtdt, by = 'label')
+
+# make plot
+treeplot_sm <- tidytree %>% 
+  ggtree(.,
+         #layout="fan",
+         aes(color = color)) +
+  geom_tippoint(aes(color =  color, shape = color),
+                show.legend = F,
+                size = 1) +
+  geom_text(aes(label = cntnm), size = 10, fontface = "bold", hjust = -0.15) +
+  theme_tree() +
+  scale_color_manual(name = "Source",
+                     values = c("#FF0018", "#B22234", "#008018", "#0000F9", "#86007D")) +
+  theme(legend.position = "none") +
+  xlim(0, 0.2)
 
 
 ```
 
-```{r, results='asis', fig.width=11, fig.height=8, fig.align='center'}
-plot(bstree_plotObj)
+
+
+```{r}
+jpeg(filename = "~/Desktop/salmonella_tree.jpg", width = 30, height = 15, units = "in", res = 500)
+cowplot::plot_grid(treeplot_large, treeplot_sm,
+                   align = "h", rel_widths = c(0.7, 0.3),
+                   labels = c("(A)", "(B)"),
+                   label_size = 42)
+graphics.off()
+
+
 ```
-
-title: "Untitled"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

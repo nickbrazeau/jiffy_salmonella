@@ -1,14 +1,135 @@
 ---
 title: "VCF Manipulation & Simulate Salmonella Parrtacus"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, eval = T, results = 'hide',
+                      fig.align = 'center', fig.width = 8, fig.height = 8)
+knitr::opts_knit$set(root.dir = here::here())
 ```
+
 ```{r}
 library(tidyverse)
 library(vcfR)
 library(vcfRmanip)
+
+```
+
+
+```{r}
+mtdt <- readr::read_tsv("mtdt/mtdt_salm_download.tsv") 
+mtdt_clean <- mtdt %>% 
+  dplyr::select(c("biosample_acc", "isolation_source", "geo_loc_name", "collection_date")) %>% 
+  dplyr::mutate(cntry = ifelse(grepl(":", geo_loc_name),
+                                      stringr::str_split_fixed(geo_loc_name, ":", n = 2)[,1],
+                                      geo_loc_name),
+                cntry = sub(" ", "", cntry),
+                pb = ifelse(grepl("peanut", isolation_source), "y", "n"), 
+                culprit = ifelse(biosample_acc == "SAMN02352699", "y", "n"),
+                nm = paste0(geo_loc_name, "_", lubridate::year(lubridate::ymd(collection_date))),
+                nm = sub("NA", "", nm)
+                ) %>% 
+  dplyr::group_by(nm) %>% 
+  dplyr::mutate(cntnm = paste0(nm, ".", 1:n())) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(c("biosample_acc", "cntnm", "pb", "culprit", "geo_loc_name", "cntry"))
+
+#............................................................
+# make parr
+#...........................................................
+parr <- tibble(biosample_acc = "parr", cntnm = "Parr!",
+               pb = "n", culprit = "n", geo_loc_name = "Parr!", cntry = "Parr!")
+
+#......................
+# combine
+#......................
+mtdt_clean <- dplyr::bind_rows(mtdt_clean, parr)
+
+#......................
+# make culprit unique
+#......................
+mtdt_clean <- mtdt_clean %>% 
+  dplyr::mutate(geo_loc_name = ifelse(culprit == "y", "Culprit!", geo_loc_name))
+
+#............................................................
+# out
+#...........................................................
+readr::write_tsv(x = mtdt_clean, file = "mtdt/mtdt_clean_sm.tab.txt")
+```
+
+```{r}
+#............................................................
+# simulate parr
+#...........................................................
+vcf <- vcfR::read.vcfR("data/salmonellavcf/thinned_passed.joint.vcf.gz")
+vcfseg <- vcfRmanip::vcfR2segsites_gt(vcfRobj = vcf)
+
+# pull out
+meta <- vcfseg@meta
+gt <- vcfseg@gt
+fix <- vcfseg@fix
+# make identical to culprit
+parr <- vcfseg@gt[, "SAMN02352699"]
+
+# make one difference
+parr[1000] <- "1/1:44,0:44:99:0,106,1607"
+
+
+
+vcf <- new("vcfR", meta = meta, fix = fix, gt = cbind(gt, parr))
+
+#............................................................
+# Tidy up
+#...........................................................
+vcfbi <- new("vcfR", meta = vcf@meta, 
+             fix = vcf@fix[is.biallelic(vcf), ], 
+             gt = vcf@gt[is.biallelic(vcf), ])
+#......................
+# drop missing loci 
+#......................
+# keep sites
+keep <- apply(vcfR::extract.gt(vcfbi, as.numeric = T), 1, function(x){sum(is.na(x))}) == 0
+# drop
+vcfbinomiss <- new("vcfR", meta = vcfbi@meta, 
+             fix = vcfbi@fix[keep, ], 
+             gt = vcfbi@gt[keep, ])
+
+#............................................................
+# consensus
+#...........................................................
+gtmat <- vcfR::extract_gt_tidy(vcfbinomiss, format_fields = "GT", alleles = F) 
+gtmatint <- gtmat %>% 
+  dplyr::mutate(gt_GT = sub("\\|", "/", gt_GT)) %>% 
+  dplyr::mutate(gtint = case_when(
+    gt_GT == "0/0" ~ 0,
+    gt_GT == "0/1" ~ 1,
+    gt_GT == "1/1" ~ 2
+  ))
+# get mean which is a number for genotype key
+mn <- gtmatint %>% 
+  dplyr::group_by(Indiv) %>% 
+  dplyr::summarise(keyval = mean(gtint)) %>% 
+  dplyr::rename(biosample_acc = Indiv)
+#......................
+# determine consenus
+#......................
+genokey <- dplyr::left_join(mtdt_clean, mn)
+keepsmpls <- !duplicated(genokey[,c("geo_loc_name", "keyval")])
+keepsmpls <- mtdt_clean$biosample_acc[keepsmpls]
+
+#......................
+# drop to consensus samples
+#......................
+convcfbinomiss <- vcfRmanip::select_samples(vcfbinomiss,
+                                            smplvctr = keepsmpls)
+
+
+#............................................................
+# save out
+#...........................................................
+saveRDS(convcfbinomiss, "data/salmonellavcf/consensus_thinned_passed.joint.vcf.gz")
 
 ```
